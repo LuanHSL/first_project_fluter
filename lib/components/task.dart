@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:nosso_primeiro_projeto/components/difficulty.dart';
+import 'package:tasks_level/components/difficulty.dart';
 
 class Task extends StatefulWidget {
   final String name;
   final String photo;
   final int difficulty;
-  const Task(this.name, this.photo, this.difficulty, {Key? key}) : super(key: key);
+  Task(this.name, this.photo, this.difficulty, {Key? key}) : super(key: key);
+
+  int level = 0;
+  int step = 0;
 
   @override
   State<Task> createState() => _TaskState();
 }
 
 class _TaskState extends State<Task> {
-  int level = 0;
-  int step = 0;
+
+  bool assetOrNetwork() {
+    return !widget.photo.contains('http');
+  }
 
   setColors() {
     final colorStepList = [
@@ -26,10 +31,10 @@ class _TaskState extends State<Task> {
       Colors.black,
     ];
 
-    if (step > colorStepList.length - 1) {
+    if (widget.step > colorStepList.length - 1) {
       return colorStepList.last;
     }
-    return colorStepList[step];
+    return colorStepList[widget.step];
   }
 
   @override
@@ -65,10 +70,15 @@ class _TaskState extends State<Task> {
                       height: 100,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
-                        child: Image.asset(
-                          widget.photo,
-                          fit: BoxFit.cover,
-                        ),
+                        child: assetOrNetwork()
+                          ? Image.asset(
+                            widget.photo,
+                            fit: BoxFit.cover,
+                          )
+                          : Image.network(
+                            widget.photo,
+                            fit: BoxFit.cover,
+                          ),
                       ),
                     ),
                     Column(
@@ -98,11 +108,11 @@ class _TaskState extends State<Task> {
                             ),
                             onPressed: () {
                               setState(() {
-                                if (level < (widget.difficulty * 10)) {
-                                  level++;
+                                if (widget.level < (widget.difficulty * 10)) {
+                                  widget.level++;
                                 } else {
-                                  level = 1;
-                                  step++;
+                                  widget.level = 1;
+                                  widget.step++;
                                 }
                               });
                             },
@@ -127,7 +137,7 @@ class _TaskState extends State<Task> {
                     child: SizedBox(
                       width: 200,
                       child: LinearProgressIndicator(
-                        value: (widget.difficulty > 0) ? (level / widget.difficulty) / 10 : 1,
+                        value: (widget.difficulty > 0) ? (widget.level / widget.difficulty) / 10 : 1,
                         color: Colors.white,
                       ),
                     ),
@@ -135,7 +145,7 @@ class _TaskState extends State<Task> {
                   Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text(
-                      'Level: $level',
+                      'Level: ${widget.level}',
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
